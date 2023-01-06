@@ -1,5 +1,5 @@
 {
-    "name": "jx3box-map",
+    "name": "@jx3box/jx3box-petmap",
     "version": "0.1.0",
     "description": "JX3BOX Game Map",
     "scripts": {
