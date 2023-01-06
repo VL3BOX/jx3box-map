@@ -1,24 +1,48 @@
-# jx3box-map
+# @jx3box/jx3box-map
 
-## Project setup
-```
-yarn install
-```
+用于各种需要在地图上展示点位的场合  
 
-### Compiles and hot-reloads for development
-```
-yarn serve
+## QuickStart
+
+```js
+import Jx3boxMap from '@jx3box/jx3box-map/src/components/Map.vue
 ```
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
+```html
+<jx3box-map :map-id="8" :datas="datas"></jx3box-map>
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```js
+export default {
+    name: "App",
+    components: {
+        Jx3boxMap,
+    },
+    data: () => ({
+        datas: [
+            {
+                x: 9655,
+                y: 13231,
+                title: "测试",
+                content: "测试内容11<br />22",
+            },
+        ],
+    }),
+};
+```
+
+## slots
+
+允许一些部分的自定义slot。
+
+### title
+
+地图上方的名称部分
+
+### point
+
+地图上的点位元素，默认是一个带popover的小红点，如果需要替换的话需要自己给上popover
+
+#### popover
+
+如果使用默认的point，可以用popover这个slot来替换的默认的popover里的内容  
