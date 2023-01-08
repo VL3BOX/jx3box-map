@@ -28,7 +28,7 @@
 
 <script>
 import jx3boxData from "@jx3box/jx3box-common/data/jx3box.json";
-import mapScales from "@/data/map_scales.json";
+import mapScales from "../data/map_scales.json";
 
 export default {
     name: "Jx3boxMap",
