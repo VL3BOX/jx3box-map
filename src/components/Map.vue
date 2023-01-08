@@ -121,6 +121,7 @@ export default {
             this.width = this.$refs["component"]?.clientWidth;
             if (!this.width) return;
             this.height = this.width / (1024 / 896);
+            this.$emit("resize", [this.width, this.height]);
         },
     },
 };
