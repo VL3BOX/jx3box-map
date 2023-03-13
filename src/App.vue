@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <jx3box-map :map-id="8" :datas="datas"></jx3box-map>
+        <jx3box-map :map-id="8" :datas="datas" :overview="false"></jx3box-map>
     </div>
 </template>
 
@@ -15,7 +15,13 @@ export default {
     data: () => ({
         datas: [
             {
-                x: 9655,
+                x: 8000,
+                y: 13231,
+                title: "测试",
+                content: "测试内容11<br />22",
+            },
+            {
+                x: 1000,
                 y: 13231,
                 title: "测试",
                 content: "测试内容11<br />22",
@@ -36,7 +42,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
-    height: 100vh;
+    width: 240px;
+    height: 240px;
 }
 </style>

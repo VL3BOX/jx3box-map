@@ -1,27 +1,30 @@
 <template>
     <div ref="component" class="c-map">
         <div class="u-map__wrapper" :style="wrapperSize">
-            <img class="u-map-img" :src="mapImg" draggable="false" />
-            <div class="u-map-title__wrapper">
-                <slot name="title" v-bind:title="mapName">
-                    <div class="u-map-title">{{ mapName }}</div>
-                </slot>
-            </div>
-            <template v-for="(i, k) in datas">
-                <div class="u-map-point__wrapper" :style="pointStyle(i)" :key="k">
-                    <slot name="point" v-bind:data="i">
-                        <el-popover class="u-map-point__popover" placement="top" width="200" trigger="hover">
-                            <slot name="popover" v-bind:data="i">
-                                <div>
-                                    <div>{{ i.title }}</div>
-                                    <div v-html="i.content"></div>
-                                </div>
-                            </slot>
-                            <span slot="reference" class="u-map-point"> </span>
-                        </el-popover>
+            <div class="u-map__inner" :style="innerStyle">
+                <img class="u-map-img" :src="mapImg" draggable="false" />
+                <div class="u-map-title__wrapper" v-if="overview">
+                    <slot name="title" v-bind:title="mapName">
+                        <div class="u-map-title">{{ mapName }}</div>
                     </slot>
                 </div>
-            </template>
+                <template v-for="(i, k) in datas">
+                    <div class="u-map-point__wrapper" :style="pointStyle(i)" :key="k">
+                        <slot name="point" v-bind:data="i">
+                            <el-popover popper-class="u-map-point__popover" placement="top" width="200" trigger="hover">
+                                <slot name="popover" v-bind:data="i">
+                                    <div>
+                                        <div v-if="!overview" class="u-map-title">{{ mapName }}</div>
+                                        <div>{{ i.title }}</div>
+                                        <div v-html="i.content"></div>
+                                    </div>
+                                </slot>
+                                <span slot="reference" class="u-map-point"> </span>
+                            </el-popover>
+                        </slot>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </template>
@@ -41,15 +44,81 @@ export default {
             type: Array,
             default: () => [],
         },
+        overview: {
+            type: Boolean,
+            default: true,
+        },
+        focus: {
+            type: Number,
+            default: undefined,
+        },
     },
     data() {
         return {
-            popoverContent: "",
-            width: 1024,
-            height: 896,
+            outerWidth: 0,
+            outerHeight: 0,
         };
     },
     computed: {
+        // 内层容器宽高
+        innerWidth() {
+            return this.overview ? this.outerWidth : 1024;
+        },
+        innerHeight() {
+            return this.overview ? this.outerHeight : 896;
+        },
+        // 容器尺寸
+        wrapperSize() {
+            return {
+                width: this.outerWidth + "px",
+                height: this.outerHeight + "px",
+            };
+        },
+        // 中心点
+        focusPoint() {
+            if (this.focus != undefined) {
+                return this.datas[this.focus];
+            } else {
+                return this.datas.find((d) => d.focus) ?? this.datas[0];
+            }
+        },
+        // 内层容器相对外层容器偏移
+        innerOffset() {
+            if (this.overview) return { x: 0, y: 0 };
+            // 外层容器的中心点
+            const outerCenter = {
+                x: this.outerWidth / 2,
+                y: this.outerHeight / 2,
+            };
+            // 要展示的点相对内层容器的偏移
+            const positionOffset = this.pointPosition(this.focusPoint);
+            const innerOffset = {
+                left: outerCenter.x - positionOffset.left,
+                bottom: outerCenter.y - positionOffset.bottom,
+            };
+            return innerOffset;
+        },
+        innerStyle() {
+            const style = {
+                width: this.innerWidth + "px",
+                height: this.innerHeight + "px",
+            };
+            if (this.overview) return style;
+            let { left, bottom } = this.innerOffset;
+            // 边界条件处理
+            const maxLeft = 0;
+            const minLeft = this.outerWidth - this.innerWidth;
+            left = Math.max(Math.min(left, maxLeft), minLeft);
+            const maxBottom = 0;
+            const minBottom = this.outerHeight - this.innerHeight;
+            bottom = Math.max(Math.min(bottom, maxBottom), minBottom);
+            return {
+                ...style,
+                left: left + "px",
+                bottom: bottom + "px",
+            };
+        },
+        // 地图ID、名称、尺寸、图片等
         subId() {
             let scales = mapScales[this.mapId];
             if (!scales || Object.keys(scales) <= 1) return 0;
@@ -78,12 +147,6 @@ export default {
         mapImg() {
             return `${jx3boxData.__imgPath}map/maps/map_${this.mapId}_${this.subId}.png`;
         },
-        wrapperSize() {
-            return {
-                width: this.width + "px",
-                height: this.height + "px",
-            };
-        },
     },
     mounted() {
         this.$nextTick(function () {
@@ -95,12 +158,19 @@ export default {
         window.removeEventListener("resize", this.updateSize);
     },
     methods: {
-        pointStyle(item) {
+        pointPosition(item) {
             const scale = this.mapScale;
             const Width = scale.Width / scale.Scale;
             const Height = scale.Height / scale.Scale;
-            const left = ((item.x - scale.StartX) / Width) * this.width;
-            const bottom = ((item.y - scale.StartY) / Height) * this.height;
+            const left = ((item.x - scale.StartX) / Width) * this.innerWidth;
+            const bottom = ((item.y - scale.StartY) / Height) * this.innerHeight;
+            return {
+                left,
+                bottom,
+            };
+        },
+        pointStyle(item) {
+            const { left, bottom } = this.pointPosition(item);
             return {
                 left: left + "px",
                 bottom: bottom + "px",
@@ -118,10 +188,14 @@ export default {
             });
         },
         updateSize() {
-            this.width = this.$refs["component"]?.clientWidth;
-            if (!this.width) return;
-            this.height = this.width / (1024 / 896);
-            this.$emit("resize", [this.width, this.height]);
+            this.outerWidth = this.$refs["component"]?.clientWidth;
+            if (!this.outerWidth) return;
+            if (this.overview) {
+                this.outerHeight = this.outerWidth / (1024 / 896);
+            } else {
+                this.outerHeight = this.$refs["component"]?.clientHeight;
+            }
+            this.$emit("resize", [this.outerWidth, this.outerHeight]);
         },
     },
 };
@@ -130,67 +204,76 @@ export default {
 <style lang="less" scoped>
 .c-map {
     width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
 
     .u-map__wrapper {
-        display: inline-block;
+        overflow: hidden;
         position: relative;
+    }
+
+    .u-map__inner {
+        display: inline-block;
+        position: absolute;
         border: 1px solid rgb(238, 238, 238);
         box-shadow: rgb(0 0 0 / 10%) 0px 0px 3px;
         box-sizing: border-box;
         user-select: none;
         height: 100%;
+    }
 
-        .u-map-img {
+    .u-map-img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .u-map-title__wrapper {
+        z-index: 2;
+        position: absolute;
+
+        top: 16px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        .u-map-title {
+            user-select: text;
+            color: #efe;
+            font-weight: bold;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    .u-map-point__wrapper {
+        z-index: 3;
+        width: 10px;
+        height: 10px;
+        position: absolute;
+
+        .u-map-point {
             display: block;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .u-map-title__wrapper {
-            z-index: 2;
-            position: absolute;
-
-            top: 16px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-
-            .u-map-title {
-                user-select: text;
-                color: #efe;
-                font-weight: bold;
-                padding: 6px;
-                background: rgba(0, 0, 0, 0.5);
+            width: 10px;
+            height: 10px;
+            background: #f94343;
+            border: #efe solid 1px;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+            &:hover {
+                transform: scale(1.6);
             }
         }
+    }
+}
 
-        .u-map-point__wrapper {
-            z-index: 3;
-            position: absolute;
-
-            .u-map-point__popover {
-                display: block;
-                width: 10px;
-                height: 10px;
-                background: #f94343;
-                border: #efe solid 1px;
-                cursor: pointer;
-                transition: all 0.1s ease-in-out;
-                &:hover {
-                    transform: scale(1.6);
-                }
-            }
-
-            .u-map-point {
-                display: block;
-                width: 10px;
-                height: 10px;
-            }
-        }
+.u-map-point__popover {
+    .u-map-title {
+        font-weight: bold;
+        color: #aaa;
     }
 }
 </style>
