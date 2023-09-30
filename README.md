@@ -51,13 +51,34 @@ export default {
 | content | 悬浮框显示的内容 | 否   |         |
 | focus   | 是否展示这个点   | 否   | true    | Boolean，多个数据focus都为true时只会展示第一个 |
 
-### overview
+### overview 总览模式
 
 默认情况下，overview为true。  
-组件会尝试展示所有的点位，并且把整个地图缩放以适应容器大小。  
-如果希望不缩放地图，仅展示一部分点位可以设置overview为false。  
-组件将会只展示特定的点位，可以在datas内的对应对象设置focus为true或者给组件传入focus属性，该属性应该是要展示的点位在datas内的索引。  
+
+**当overview为true时：**  
+组件会把整个地图缩放以适应容器大小，尝试展示完整的地图与点位。  
+
+**当overview为false时：**  
+组件会以地图的原尺寸展示地图，仅展示以特定点位为`中心`的周围一部分点位。  
+可以在datas内的对应对象设置focus为true指定中心点位。  
+或者给组件传入focus属性，值是要展示的点位在datas内的索引。  
 如果不通过任何方式指定要展示的点位会直接取第一个。  
+
+### map-draggable
+
+是否允许用户拖动地图，仅在overview为false时生效。  
+此时用户可以通过拖动地图来改变可见区域  
+即默认会以focus点为中心，但是用户可以拖动来改变展示的区域  
+
+### point-draggable
+
+是否允许用户拖动点位。需要`:datas.sync="points"`  
+此时用户可以通过拖动点位来改变点位的坐标。  
+
+### trim-border
+
+是否移除地图边框。  
+西山居的中地图图片是有边框的，默认不展示边框，如果需要展示可以设为`true`
 
 ## slots
 

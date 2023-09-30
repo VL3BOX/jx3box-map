@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <jx3box-map :map-id="8" :datas="datas" :overview="false"></jx3box-map>
+        <jx3box-map :map-id="8" :datas="datas" :overview="true"></jx3box-map>
     </div>
 </template>
 
@@ -42,7 +42,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 240px;
-    height: 240px;
+    width: 1000px;
+    height: 1000px;
 }
 </style>

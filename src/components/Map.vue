@@ -31,15 +31,17 @@
 
 <script>
 import jx3boxData from "@jx3box/jx3box-common/data/jx3box.json";
-import mapScales from "../data/map_scales.json";
+import { getMapScales } from "../service/data";
 
 export default {
     name: "Jx3boxMap",
     props: {
+        // 地图ID
         mapId: {
             type: Number,
             default: 1,
         },
+        // 点位数据
         datas: {
             type: Array,
             default: () => [],
@@ -52,13 +54,20 @@ export default {
             type: Number,
             default: undefined,
         },
+        hiddenBoarder: {
+            type: Boolean,
+            default: false,
+        },
+        draggable: {
+            type: Boolean,
+            default: true,
+        },
     },
-    data() {
-        return {
-            outerWidth: 0,
-            outerHeight: 0,
-        };
-    },
+    data: () => ({
+        outerWidth: 0,
+        outerHeight: 0,
+        mapScales: {},
+    }),
     computed: {
         // 内层容器宽高
         innerWidth() {
@@ -120,7 +129,7 @@ export default {
         },
         // 地图ID、名称、尺寸、图片等
         subId() {
-            let scales = mapScales[this.mapId];
+            let scales = this.mapScales[this.mapId];
             if (!scales || Object.keys(scales) <= 1) return 0;
             let _sub = 0;
             let _subScale = 0;
@@ -139,16 +148,19 @@ export default {
             return _sub;
         },
         mapName() {
-            return mapScales[this.mapId][this.subId].Name;
+            return this.mapScales[this.mapId]?.[this.subId]?.Name;
         },
         mapScale() {
-            return mapScales[this.mapId][this.subId];
+            return this.mapScales[this.mapId]?.[this.subId];
         },
         mapImg() {
             return `${jx3boxData.__imgPath}map/maps/map_${this.mapId}_${this.subId}.png`;
         },
     },
     mounted() {
+        getMapScales().then((data) => {
+            this.mapScales = data;
+        });
         this.$nextTick(function () {
             this.updateSize();
             window.addEventListener("resize", this.updateSize);
@@ -160,6 +172,7 @@ export default {
     methods: {
         pointPosition(item) {
             const scale = this.mapScale;
+            if (!scale) return { left: 0, bottom: 0 };
             const Width = scale.Width / scale.Scale;
             const Height = scale.Height / scale.Scale;
             const left = ((item.x - scale.StartX) / Width) * this.innerWidth;

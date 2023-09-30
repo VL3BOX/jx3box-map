@@ -1,6 +1,6 @@
 {
     "name": "@jx3box/jx3box-map",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "JX3BOX Game Map",
     "scripts": {
         "serve": "vue-cli-service serve",
