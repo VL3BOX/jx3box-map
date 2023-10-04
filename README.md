@@ -72,13 +72,42 @@ export default {
 
 ### point-draggable
 
-是否允许用户拖动点位。需要`:datas.sync="points"`  
+是否允许用户移动点位。  
 此时用户可以通过拖动点位来改变点位的坐标。  
+
+### map-follow
+
+用户拖拽点位之后是否让地图跟随被拖拽的点居中。
 
 ### trim-border
 
 是否移除地图边框。  
 西山居的中地图图片是有边框的，默认不展示边框，如果需要展示可以设为`true`
+
+## 事件
+
+### map-move
+
+用户拖拽地图之后触发
+
+### point-move
+
+用户拖拽点位之后触发
+
+## 方法
+
+### pointPosition(point) -> {left: ..., bottom: ...}
+
+获得一个坐标（游戏坐标）在当前地图的中地图偏移（像素）
+
+### gamePosition(left, bottom) -> {x: ..., y: ...}
+
+和上面相反
+
+### initInnerOffset(point)
+
+移动inner，使得一个点尽可能居
+
 
 ## slots
 

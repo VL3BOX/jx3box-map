@@ -1,6 +1,16 @@
 <template>
     <div id="app">
-        <jx3box-map :map-id="8" :datas="datas" :overview="true"></jx3box-map>
+        <jx3box-map
+            :map-id="8"
+            :datas="datas"
+            :overview="false"
+            :map-draggable="true"
+            :point-draggable="true"
+            @map-move="mapMoveHandle"
+            @point-move="pointMoveHandle"
+            @map-click="mapClickHandle"
+        >
+        </jx3box-map>
     </div>
 </template>
 
@@ -11,6 +21,17 @@ export default {
     name: "App",
     components: {
         Jx3boxMap,
+    },
+    methods: {
+        mapMoveHandle(e) {
+            console.log(e);
+        },
+        pointMoveHandle(e) {
+            console.log(e);
+        },
+        mapClickHandle(e) {
+            console.log(e);
+        },
     },
     data: () => ({
         datas: [
@@ -42,7 +63,19 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 1000px;
-    height: 1000px;
+    width: 900px;
+    height: 900px;
+}
+
+.aaa11212 {
+    width: 20px;
+    height: 20px;
+    background-color: red;
+}
+
+.bb1212 {
+    width: 10px;
+    height: 10px;
+    background-color: blue;
 }
 </style>
